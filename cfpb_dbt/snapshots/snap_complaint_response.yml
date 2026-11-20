@@ -1,0 +1,10 @@
+snapshots:
+  - name: snap_complaint_response
+    relation: ref('stg_complaints')
+    config:
+      unique_key: complaint_id
+      strategy: check
+      check_cols:
+        - company_response
+        - company_public_response
+        - timely_response_flag

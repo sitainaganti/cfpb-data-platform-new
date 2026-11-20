@@ -1,3 +1,9 @@
+{{ config(
+    materialized = 'incremental',
+    unique_key = 'complaint_id',
+    incremental_strategy = 'merge'
+) }}
+
 select
     complaint_id,
     md5(company)                              as company_key,
@@ -10,5 +16,11 @@ select
     company_response,
     timely_response_flag,
     days_to_company,
-    1 as complaint_count
+    1 as complaint_count,
+    load_ts
 from {{ ref('stg_complaints') }}
+
+{% if is_incremental() %}
+  -- only rows loaded into silver since the last run of this model
+  where load_ts > (select max(load_ts) from {{ this }})
+{% endif %}
